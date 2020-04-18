@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Form\TaskType;
+use App\Repository\TaskRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,10 +15,17 @@ class TaskController extends AbstractController
 {
     /**
      * @Route("/task", name="task_list")
+     * @param TaskRepository $taskRepository
+     * @return Response
      */
-    public function listAction()
+    public function listAction(TaskRepository $taskRepository)
     {
-        return $this->render('task/list.html.twig', ['tasks' => $this->getDoctrine()->getRepository(Task::class)->findAll()]);
+        $tasksNotFinish = $taskRepository->findBy(['isDone'=>false]);
+
+        return $this->render('task/list.html.twig',
+            [
+                'tasks' => $tasksNotFinish
+            ]);
     }
 
     /**
