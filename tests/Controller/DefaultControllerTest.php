@@ -1,58 +1,14 @@
 <?php
 
-use App\Entity\User;
 use App\Tests\CreateUser;
 use App\Tests\UserLogin;
-use Doctrine\ORM\Tools\SchemaTool;
-use Doctrine\ORM\Tools\ToolsException;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use App\Tests\Framework\WebTestCase;
 
 
 class DefaultControllerTest extends WebTestCase
 {
     use CreateUser;
     use UserLogin;
-
-
-    private $client;
-    private $em;
-    private $encoder;
-
-    /**
-     * Declanchement avant chaque test
-     * Permet de vider la base et d'initialiser les attributs
-     * @throws ToolsException
-     */
-    protected function setUp() :void
-    {
-        parent::setUp();
-        //Pour le boot du kernel
-        $this->client = static::createClient();
-        //Arrange
-        //recupere l'entity manager
-        $doctrine = self::$container->get('doctrine');
-        $this->em = $doctrine->getManager();
-
-        //recupere l'encoder
-        $this->encoder = self::$container->get('security.user_password_encoder.generic');
-
-        //vide la base et crée les tables
-        static $metadata = null;
-
-        if (is_null($metadata)) {
-            $metadata = $this->em->getMetadataFactory()->getAllMetadata();
-        }
-
-        $schemaTool = new SchemaTool($this->em);
-        $schemaTool->dropDatabase();
-
-        if (!empty($metadata)) {
-            $schemaTool->createSchema($metadata);
-        }
-    }
-
 
     /**
      * @test
@@ -151,13 +107,5 @@ class DefaultControllerTest extends WebTestCase
         //check le contenu de la page
         $this->assertSelectorExists('.btn.btn-info');
         $this->assertSelectorTextContains('h1','Bienvenue sur Todo List');
-    }
-
-
-    public function tearDown(): void
-    {
-        parent::tearDown();
-        $this->em->close();
-        $this->em = null;
     }
 }

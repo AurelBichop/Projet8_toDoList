@@ -10,6 +10,7 @@ trait CreateUser
 {
     /**
      * Pour la création d'un utilisateur en Bdd
+     *
      * @param EntityManagerInterface $em
      * @param UserPasswordEncoderInterface $encoder
      * @return User
