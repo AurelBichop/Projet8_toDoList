@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Tests\Controller;
+
 use App\Tests\CreateUser;
 use App\Tests\UserLogin;
 use App\Tests\Framework\WebTestCase;

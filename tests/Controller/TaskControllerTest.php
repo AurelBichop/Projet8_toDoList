@@ -47,7 +47,12 @@ class TaskControllerTest extends WebTestCase
         $this->login($this->client, $user);
 
         //Act
-        $this->client->request('GET', '/task');
+        $crawler = $this->client->request('GET', '/');
+        //clique sur le bouton de la liste des tâches
+        $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
+        $this->client->click($link);
+
+
         $responseContent = $this->client->getResponse()->getContent();
 
 
@@ -79,8 +84,14 @@ class TaskControllerTest extends WebTestCase
         $this->login($this->client, $user);
 
         //Act
-        $this->client->request('GET', '/task');
+        $crawler = $this->client->request('GET', '/');
+
+        //clique sur le bouton de la liste des tâches
+        $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
+        $this->client->click($link);
+
         $responseContent = $this->client->getResponse()->getContent();
+
 
         //Assert
         $this->assertResponseIsSuccessful();
