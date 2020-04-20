@@ -52,9 +52,7 @@ class TaskControllerTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
         $this->client->click($link);
 
-
         $responseContent = $this->client->getResponse()->getContent();
-
 
         //Assert
         $this->assertResponseIsSuccessful();
@@ -69,7 +67,7 @@ class TaskControllerTest extends WebTestCase
     /**
      * @test
      */
-    public function index_should_not_list_task_finish()
+    public function index_should_not_in_list_task_finish()
     {
         //Arrange
         $task1 = $this->createTask('Premiere Tache fini',' contenu d\'une tache fini',true);
@@ -92,7 +90,6 @@ class TaskControllerTest extends WebTestCase
 
         $responseContent = $this->client->getResponse()->getContent();
 
-
         //Assert
         $this->assertResponseIsSuccessful();
 
@@ -101,5 +98,71 @@ class TaskControllerTest extends WebTestCase
             $this->assertStringNotContainsString($oneTask->getContent(), $responseContent);
             $this->assertTrue($oneTask->isDone());
         }
+    }
+
+    /**
+     * @test
+     */
+    public function list_of_task_finish(){
+        //Création de l'utilisateur
+        $user = $this->userFixture($this->em, $this->encoder);
+        //Creation de la session avec le token de connection
+        $this->login($this->client, $user);
+
+        //3 tâches fini
+        $task1 = $this->createTask('Premiere Tache fini',' contenu tache fini',true);
+        $task2 = $this->createTask('Deuxieme Tache fini', 'Faire ma vidange',true);
+        $task3 = $this->createTask('Troisime tache fini', 'réinstallation de mon serveur web',true);
+
+        $listTaskFinish = [$task1,$task2,$task3];
+
+        //Act
+        $crawler = $this->client->request('GET', '/');
+
+        //clique sur le bouton de la liste des tâches
+        $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
+        $this->client->click($link);
+        $responseContent = $this->client->getResponse()->getContent();
+
+        //Assert
+        $this->assertResponseIsSuccessful();
+
+        foreach ($listTaskFinish as $oneTask){
+            $this->assertStringContainsString($oneTask->getTitle(), $responseContent);
+            $this->assertStringContainsString($oneTask->getContent(), $responseContent);
+            $this->assertTrue($oneTask->isDone());
+        }
+    }
+
+
+    /**
+     * @test
+     */
+    public function toggle_task_action_should_be_done()
+    {
+        //Arrange
+        $task1 = $this->createTask();
+        //Création de l'utilisateur
+        $user = $this->userFixture($this->em, $this->encoder);
+        //Creation de la session avec le token de connection
+        $this->login($this->client, $user);
+
+        //Act
+        $crawler = $this->client->request('GET', '/task');
+        //clique sur le bouton du formulaire
+        $form = $crawler->selectButton('Marquer comme faite')->form();
+        $this->client->submit($form);
+        $crawler = $this->client->followRedirect();
+
+        $responseContent = $this->client->getResponse()->getContent();
+
+        //Assert
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists(".alert.alert-success");
+        $this->assertStringContainsString($task1->getTitle(), $responseContent);
+        $this->assertStringNotContainsString($task1->getContent(), $responseContent);
+
+        //A refaire en  vérifiant en bdd
+        //$this->assertFalse($task1->isDone());
     }
 }
