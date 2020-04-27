@@ -4,6 +4,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Task;
+use App\Entity\User;
 use App\Tests\CreateUser;
 use App\Tests\UserLogin;
 use App\Tests\Framework\WebTestCase;
@@ -15,29 +16,33 @@ class TaskControllerTest extends WebTestCase
 
     /**
      * Création d'un utlisateur qui a une session de connection
-     * @return void
+     * @return User
      */
-    private function userConnected():void
+    private function userConnected(): User
     {
         //Création de l'utilisateur
         $user = $this->userFixture($this->em, $this->encoder);
         //Creation de la session avec le token de connection
         $this->login($this->client, $user);
+
+        return $user;
     }
 
 
     /**
      * Permet de creer un Tache fixture
+     * @param User $author
      * @param string $titre
      * @param string $content
      * @param bool $isDone
      * @return Task
      */
-    private function createTask(string $titre = 'Ma premiere Tache',string $content = 'contenue de tache',$isDone = false):Task
+    private function createTask(User $author, string $titre = 'Ma premiere Tache',string $content = 'contenue de tache',$isDone = false):Task
     {
         $task = new Task();
         $task->setTitle($titre)
              ->setContent($content)
+             ->setAuthor($author)
              ->setCreatedAt(new \DateTime());
 
         if($isDone){
@@ -56,14 +61,15 @@ class TaskControllerTest extends WebTestCase
     public function index_should_list_task_not_finish()
     {
         //Arrange
-        $task1 = $this->createTask();
-        $task2 = $this->createTask('Deuxieme Tache', 'Faire ma vidange');
-        $task3 = $this->createTask('Troisime tache', 'réinstallation de mon serveur web');
+        //Création et connection de l'utilisateur
+        $user = $this->userConnected();
+
+        //création des taches par l'utilisateur connecté
+        $task1 = $this->createTask($user);
+        $task2 = $this->createTask($user,'Deuxieme Tache', 'Faire ma vidange');
+        $task3 = $this->createTask($user,'Troisime tache', 'réinstallation de mon serveur web');
 
         $listTaskNotFinish = [$task1,$task2,$task3];
-
-        //Création et connection de l'utilisateur
-        $this->userConnected();
 
         //Act
         $crawler = $this->client->request('GET', '/');
@@ -88,15 +94,15 @@ class TaskControllerTest extends WebTestCase
      */
     public function index_should_be_not_in_list_task_not_finish()
     {
+        //Création et connection de l'utilisateur
+        $user = $this->userConnected();
+
         //Arrange
-        $task1 = $this->createTask('Premiere Tache fini',' contenu d\'une tache fini',true);
-        $task2 = $this->createTask('Deuxieme Tache fini', 'Faire ma vidange',true);
-        $task3 = $this->createTask('Troisime tache fini', 'réinstallation de mon serveur web',true);
+        $task1 = $this->createTask($user,'Premiere Tache fini',' contenu d\'une tache fini',true);
+        $task2 = $this->createTask($user,'Deuxieme Tache fini', 'Faire ma vidange',true);
+        $task3 = $this->createTask($user,'Troisime tache fini', 'réinstallation de mon serveur web',true);
 
         $listTaskFinish = [$task1,$task2,$task3];
-
-        //Création et connection de l'utilisateur
-        $this->userConnected();
 
         //Act
         $crawler = $this->client->request('GET', '/');
@@ -123,12 +129,12 @@ class TaskControllerTest extends WebTestCase
     public function list_of_task_finish(){
 
         //Création et connection de l'utilisateur
-        $this->userConnected();
+        $user = $this->userConnected();
 
         //tâches fini
-        $task1 = $this->createTask('Premiere Tache fini',' contenu tache fini',true);
-        $task2 = $this->createTask('Deuxieme Tache fini', 'Faire ma vidange',true);
-        $task3 = $this->createTask('Troisime tache fini', 'réinstallation de mon serveur web',true);
+        $task1 = $this->createTask($user,'Premiere Tache fini',' contenu tache fini',true);
+        $task2 = $this->createTask($user,'Deuxieme Tache fini', 'Faire ma vidange',true);
+        $task3 = $this->createTask($user,'Troisime tache fini', 'réinstallation de mon serveur web',true);
 
         $listTaskFinish = [$task1,$task2,$task3];
 
@@ -156,11 +162,10 @@ class TaskControllerTest extends WebTestCase
      */
     public function toggle_task_action_should_be_done()
     {
-        //Arrange
-        $task1 = $this->createTask();
-
         //Création et connection de l'utilisateur
-        $this->userConnected();
+        $user = $this->userConnected();
+        //Arrange
+        $task1 = $this->createTask($user);
 
         //Act
         $crawler = $this->client->request('GET', '/task');
@@ -210,10 +215,10 @@ class TaskControllerTest extends WebTestCase
      */
     public function edit_task_action()
     {
-        //Création d'une tache à éditer
-        $task1 = $this->createTask();
         //Création et connection de l'utilisateur
-        $this->userConnected();
+        $user = $this->userConnected();
+        //Création d'une tache à éditer
+        $task1 = $this->createTask($user);
 
         //Act
         $crawler = $this->client->request('GET', '/tasks/'.$task1->getId().'/edit');
@@ -241,10 +246,10 @@ class TaskControllerTest extends WebTestCase
      * @test
      */
     public function delete_task_action(){
-        //Création d'une tache à éditer
-        $task1 = $this->createTask();
         //Création et connection de l'utilisateur
-        $this->userConnected();
+        $user = $this->userConnected();
+        //Création d'une tache à éditer
+        $task1 = $this->createTask($user);
 
         //Act
         $crawler = $this->client->request('GET', '/task');

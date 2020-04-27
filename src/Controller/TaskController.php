@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Task;
 use App\Form\TaskType;
 use App\Repository\TaskRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,6 +47,8 @@ class TaskController extends AbstractController
 
 
     /**
+     * @IsGranted("ROLE_USER")
+     *
      * @Route("/tasks/create", name="task_create")
      * @param Request $request
      * @return RedirectResponse|Response
@@ -59,6 +63,8 @@ class TaskController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
 
+            $task->setAuthor($this->getUser());
+
             $em->persist($task);
             $em->flush();
 
@@ -71,6 +77,8 @@ class TaskController extends AbstractController
     }
 
     /**
+     * @Security("is_granted('ROLE_USER') and user === task.getAuthor()")
+     *
      * @Route("/tasks/{id}/edit", name="task_edit")
      * @param Task $task
      * @param Request $request
@@ -97,6 +105,8 @@ class TaskController extends AbstractController
     }
 
     /**
+     * @Security("is_granted('ROLE_USER') and user === task.getAuthor()")
+     *
      * @Route("/tasks/{id}/toggle", name="task_toggle")
      * @param Task $task
      * @return RedirectResponse
@@ -112,6 +122,8 @@ class TaskController extends AbstractController
     }
 
     /**
+     * @Security("is_granted('ROLE_USER') and user === task.getAuthor()")
+     *
      * @Route("/tasks/{id}/delete", name="task_delete")
      * @param Task $task
      * @return RedirectResponse
