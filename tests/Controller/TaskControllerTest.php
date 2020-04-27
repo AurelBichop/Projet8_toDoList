@@ -67,7 +67,7 @@ class TaskControllerTest extends WebTestCase
     /**
      * @test
      */
-    public function index_should_not_in_list_task_finish()
+    public function index_should_be_not_in_list_task_not_finish()
     {
         //Arrange
         $task1 = $this->createTask('Premiere Tache fini',' contenu d\'une tache fini',true);
@@ -161,8 +161,8 @@ class TaskControllerTest extends WebTestCase
         $this->assertSelectorExists(".alert.alert-success");
         $this->assertStringContainsString($task1->getTitle(), $responseContent);
         $this->assertStringNotContainsString($task1->getContent(), $responseContent);
-
-        //A refaire en  vérifiant en bdd
-        //$this->assertFalse($task1->isDone());
     }
+
+    //A refaire en  vérifiant en bdd mofification toggle Task
+    //$this->assertFalse($task1->isDone());
 }

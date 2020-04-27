@@ -2,12 +2,15 @@
 
 namespace App\Tests\Framework;
 
+use App\Tests\Framework\Traits\RefreshDataBase;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\ORM\Tools\ToolsException;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase as BaseWebTestCase;
 
 class WebTestCase extends BaseWebTestCase
 {
+    use RefreshDataBase;
+
     protected $client;
     protected $em;
     protected $encoder;
@@ -32,20 +35,10 @@ class WebTestCase extends BaseWebTestCase
         $this->encoder = self::$container->get('security.user_password_encoder.generic');
 
         //vide la base et crée les tables
-        static $metadata = null;
-
-        if (is_null($metadata)) {
-            $metadata = $this->em->getMetadataFactory()->getAllMetadata();
-        }
-
-        $schemaTool = new SchemaTool($this->em);
-        $schemaTool->dropDatabase();
-
-        if (!empty($metadata)) {
-            $schemaTool->createSchema($metadata);
-        }
+        $this->refreshDataBase();
     }
 
+    //close l'entity manager (evite les fuites de mémoires)
     public function tearDown(): void
     {
         parent::tearDown();
