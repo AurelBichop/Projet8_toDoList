@@ -32,7 +32,6 @@ class SecurityController extends AbstractController
      */
     public function loginCheck()
     {
-        // This code is never executed.
     }
 
     /**
@@ -40,6 +39,5 @@ class SecurityController extends AbstractController
      */
     public function logoutCheck()
     {
-        // This code is never executed.
     }
 }
