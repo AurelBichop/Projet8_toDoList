@@ -16,13 +16,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class TaskController extends AbstractController
 {
     /**
+     * @IsGranted("ROLE_USER")
+     *
      * @Route("/task", name="task_list")
      * @param TaskRepository $taskRepository
      * @return Response
      */
     public function listAction(TaskRepository $taskRepository)
     {
-        $tasksNotFinish = $taskRepository->findBy(['isDone'=>false]);
+        $tasksNotFinish = $taskRepository->findBy(['isDone'=>false, 'author'=>$this->getUser()]);
 
         return $this->render('task/list.html.twig',
             [
@@ -31,13 +33,15 @@ class TaskController extends AbstractController
     }
 
     /**
+     * @IsGranted("ROLE_USER")
+     *
      * @Route("/task/finish", name="task_finish")
      * @param TaskRepository $taskRepository
      * @return Response
      */
     public function listActionFinish(TaskRepository $taskRepository)
     {
-        $tasksFinish = $taskRepository->findBy(['isDone'=>true]);
+        $tasksFinish = $taskRepository->findBy(['isDone'=>true,'author'=>$this->getUser()]);
 
         return $this->render('task/listeFinish.html.twig',
             [

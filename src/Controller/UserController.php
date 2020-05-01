@@ -80,4 +80,31 @@ class UserController extends AbstractController
 
         return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);
     }
+
+    /**
+     * @Route("/compte/edit", name="compte_edit")
+     * @param Request $request
+     * @return RedirectResponse|Response
+     */
+    public function editCompte(Request $request)
+    {
+        $user = $this->getUser();
+
+        $form = $this->createForm(UserType::class, $user);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
+            $user->setPassword($password);
+
+            $this->getDoctrine()->getManager()->flush();
+
+            $this->addFlash('success', "L'utilisateur a bien été modifié");
+
+            return $this->redirectToRoute('user_list');
+        }
+
+        return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);
+    }
 }

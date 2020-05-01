@@ -86,6 +86,7 @@ class TaskControllerTest extends WebTestCase
             $this->assertStringContainsString($oneTask->getTitle(), $responseContent);
             $this->assertStringContainsString($oneTask->getContent(), $responseContent);
             $this->assertFalse($oneTask->isDone());
+            $this->assertSame($user,$oneTask->getAuthor());
         }
     }
 
@@ -153,6 +154,7 @@ class TaskControllerTest extends WebTestCase
             $this->assertStringContainsString($oneTask->getTitle(), $responseContent);
             $this->assertStringContainsString($oneTask->getContent(), $responseContent);
             $this->assertTrue($oneTask->isDone());
+            $this->assertSame($user,$oneTask->getAuthor());
         }
     }
 
