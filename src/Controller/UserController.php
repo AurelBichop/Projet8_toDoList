@@ -59,16 +59,17 @@ class UserController extends AbstractController
      * @Route("/users/{id}/edit", name="user_edit")
      * @param User $user
      * @param Request $request
+     * @param UserPasswordEncoderInterface $encoder
      * @return RedirectResponse|Response
      */
-    public function editAction(User $user, Request $request)
+    public function editAction(User $user, Request $request,UserPasswordEncoderInterface $encoder)
     {
         $form = $this->createForm(UserType::class, $user);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
+            $password = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
 
             $this->getDoctrine()->getManager()->flush();
@@ -84,9 +85,10 @@ class UserController extends AbstractController
     /**
      * @Route("/compte/edit", name="compte_edit")
      * @param Request $request
+     * @param UserPasswordEncoderInterface $encoder
      * @return RedirectResponse|Response
      */
-    public function editCompte(Request $request)
+    public function editCompte(Request $request,UserPasswordEncoderInterface $encoder)
     {
         $user = $this->getUser();
 
@@ -95,7 +97,7 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
+            $password = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
 
             $this->getDoctrine()->getManager()->flush();

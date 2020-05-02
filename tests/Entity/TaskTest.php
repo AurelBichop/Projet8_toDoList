@@ -11,7 +11,7 @@ class TaskTest extends TestCase
     /**
      * @test
      */
-    public function an_task_should_be_done(){
+    public function a_task_should_be_done(){
         //Arrange
         $task1 = new Task();
 
