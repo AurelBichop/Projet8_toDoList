@@ -51,6 +51,11 @@ class User implements UserInterface
      */
     private $roles;
 
+    /**
+     * Pour la modification l'ajout de ROLE_ADMIN avec le formulaire en admin
+     */
+    private $adminBool;
+
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
@@ -111,6 +116,28 @@ class User implements UserInterface
 
         return $userRoles;
     }
+
+    /**
+     * @param mixed $adminBool
+     */
+    public function setAdminBool($adminBool)
+    {
+        $this->adminBool = $adminBool;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getAdminBool(): bool
+    {
+        $checkRoleAdmin = array_search("ROLE_ADMIN",$this->getRoles());
+
+        if($checkRoleAdmin !== false){
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * @inheritDoc

@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserAdminType;
 use App\Form\UserType;
+use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -59,18 +61,25 @@ class UserController extends AbstractController
      * @Route("/users/{id}/edit", name="user_edit")
      * @param User $user
      * @param Request $request
-     * @param UserPasswordEncoderInterface $encoder
+     * @param RoleRepository $roleRepository
      * @return RedirectResponse|Response
      */
-    public function editAction(User $user, Request $request,UserPasswordEncoderInterface $encoder)
+    public function editAction(User $user, Request $request,RoleRepository $roleRepository)
     {
-        $form = $this->createForm(UserType::class, $user);
-
+        $form = $this->createForm(UserAdminType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $encoder->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
+
+            $checkAdmin = $form['adminBool']->getData();
+
+            $roleAdmin = $roleRepository->findOneBy(['title'=>'ROLE_ADMIN']);
+            //Permet l'enregistrement de l'ajout du ROLE_ADMIN
+            if($checkAdmin){
+                $user->addRole($roleAdmin);
+            }else{
+                $user->removeRole($roleAdmin);
+            }
 
             $this->getDoctrine()->getManager()->flush();
 
@@ -104,7 +113,7 @@ class UserController extends AbstractController
 
             $this->addFlash('success', "L'utilisateur a bien été modifié");
 
-            return $this->redirectToRoute('user_list');
+            return $this->redirectToRoute('homepage');
         }
 
         return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);
