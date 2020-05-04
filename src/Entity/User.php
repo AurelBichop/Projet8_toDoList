@@ -135,6 +135,7 @@ class User implements UserInterface
         if($checkRoleAdmin !== false){
             return true;
         }
+
         return false;
     }
 

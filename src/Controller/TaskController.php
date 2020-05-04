@@ -26,6 +26,12 @@ class TaskController extends AbstractController
     {
         $tasksNotFinish = $taskRepository->findBy(['isDone'=>false, 'author'=>$this->getUser()]);
 
+        //Permet la recuperation des taches anonyme pour l'admin
+        if($this->getUser()->getAdminBool()){
+            $tasksNotFinishAnonyme = $taskRepository->findBy(['isDone'=>false, 'author'=>null]);
+            $tasksNotFinish = array_merge($tasksNotFinish,$tasksNotFinishAnonyme);
+        }
+
         return $this->render('task/list.html.twig',
             [
                 'tasks' => $tasksNotFinish,
@@ -42,6 +48,13 @@ class TaskController extends AbstractController
     public function listActionFinish(TaskRepository $taskRepository)
     {
         $tasksFinish = $taskRepository->findBy(['isDone'=>true,'author'=>$this->getUser()]);
+
+        //Permet la recuperation des taches anonyme pour l'admin
+        if($this->getUser()->getAdminBool()){
+            $tasksFinishAnonyme = $taskRepository->findBy(['isDone'=>false, 'author'=>null]);
+            $tasksFinish = array_merge($tasksFinish,$tasksFinishAnonyme);
+        }
+
 
         return $this->render('task/listeFinish.html.twig',
             [
@@ -81,8 +94,7 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Security("is_granted('ROLE_USER') and user === task.getAuthor()")
-     *
+     * @Security("(is_granted('ROLE_USER') and user === task.getAuthor()) or (is_granted('ROLE_ADMIN') and null === task.getAuthor())")
      * @Route("/tasks/{id}/edit", name="task_edit")
      * @param Task $task
      * @param Request $request
@@ -109,7 +121,7 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Security("is_granted('ROLE_USER') and user === task.getAuthor()")
+     * @Security("(is_granted('ROLE_USER') and user === task.getAuthor()) or (is_granted('ROLE_ADMIN') and null === task.getAuthor())")
      *
      * @Route("/tasks/{id}/toggle", name="task_toggle")
      * @param Task $task
@@ -126,7 +138,7 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Security("is_granted('ROLE_USER') and user === task.getAuthor()")
+     * @Security("(is_granted('ROLE_USER') and user === task.getAuthor()) or (is_granted('ROLE_ADMIN') and null === task.getAuthor())")
      *
      * @Route("/tasks/{id}/delete", name="task_delete")
      * @param Task $task
