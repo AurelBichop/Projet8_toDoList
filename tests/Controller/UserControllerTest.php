@@ -1,6 +1,7 @@
 <?php
 namespace App\Tests\Controller;
 
+use App\Entity\Role;
 use App\Entity\User;
 use App\Tests\CreateUser;
 use App\Tests\UserLogin;
@@ -12,10 +13,26 @@ class UserControllerTest extends WebTestCase
     use UserLogin;
 
     /**
+     * Création d'un ROLE_ADMIN
+     * @param string $nameRole
+     * @return Role
+     */
+    private function createRole($nameRole = "ROLE_ADMIN"): Role
+    {
+        $role = new Role();
+        $role->setTitle($nameRole);
+
+        $this->em->persist($role);
+        $this->em->flush();
+
+        return $role;
+    }
+
+    /**
      * Création d'un user ROLE_ADMIN et sa connection
      * @return User
      */
-    private function createAdminConnected()
+    private function createAdminConnected(): User
     {
         $admin = $this->adminFixture($this->em, $this->encoder);
         $this->login($this->client, $admin);
@@ -52,7 +69,6 @@ class UserControllerTest extends WebTestCase
         }
         $this->assertCount(count($allUsers), $crawler->filter('a.btn.btn-success.btn-sm'));
     }
-
 
     /**
      * @test
@@ -146,7 +162,6 @@ class UserControllerTest extends WebTestCase
     public function show_edit_his_user_profile()
     {
         $user = $this->userFixture($this->em, $this->encoder);
-
         $this->login($this->client, $user);
 
         $this->client->request('GET', '/compte/edit');
@@ -156,8 +171,137 @@ class UserControllerTest extends WebTestCase
         $this->assertStringContainsString($user->getEmail(),$responseContent);
     }
 
+    /**
+     * @test
+     */
+    public function edit_his_user_profile_action()
+    {
+        $user = $this->userFixture($this->em, $this->encoder);
+        $this->login($this->client, $user);
 
+        $crawler = $this->client->request('GET', '/compte/edit');
+        $form = $crawler->selectButton('Modifier')->form([
+            'user[username]' => 'michel',
+            'user[password][first]' => 'password',
+            'user[password][second]' => 'password',
+            'user[email]' => 'michel@perdusonchat.com'
+        ]);
+        $this->client->submit($form);
 
+        $this->assertResponseRedirects('/');
+        $crawler = $this->client->followRedirect();
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success');
+
+        //Retour sur mon compte pour voir les modifications
+        $link = $crawler->selectLink('Modifier mon compte')->link();
+        $this->client->click($link);
+        $responseContent = $this->client->getResponse()->getContent();
+
+        $this->assertStringContainsString('michel',$responseContent);
+        $this->assertStringContainsString('michel@perdusonchat.com',$responseContent);
+    }
+
+    /**
+     * @test
+     */
+    public function show_form_for_edit_a_user_profile_with_admin_role()
+    {
+        //Création et connection de l'admin
+        $this->createAdminConnected();
+
+        $user = $this->userFixture($this->em, $this->encoder);
+
+        $this->client->request('GET', '/users/'.$user->getId().'/edit');
+        $responseContent = $this->client->getResponse()->getContent();
+
+        $this->assertStringContainsString($user->getUsername(),$responseContent);
+        $this->assertStringContainsString($user->getEmail(),$responseContent);
+        $this->assertStringNotContainsString("checked=\"checked\"", $responseContent);
+    }
+
+    /**
+     * @test
+     */
+    public function show_form_for_edit_a_admin_profile_with_admin_role()
+    {
+        //Création et connection de l'admin
+        $this->createAdminConnected();
+
+        //création de l'utilisateur et attribution d'un role admin
+        $user = $this->userFixture($this->em, $this->encoder);
+        $roleAdmin = $this->createRole();
+        $user->addRole($roleAdmin);
+
+        $this->client->request('GET', '/users/'.$user->getId().'/edit');
+        $responseContent = $this->client->getResponse()->getContent();
+
+        $this->assertStringContainsString($user->getUsername(),$responseContent);
+        $this->assertStringContainsString($user->getEmail(),$responseContent);
+        $this->assertStringContainsString("checked=\"checked\"", $responseContent);
+    }
+
+    /**
+     * @test
+     */
+    public function edit_a_user_profile_with_admin_role()
+    {
+        //Création et connection de l'admin
+        $this->createAdminConnected();
+
+        //création de l'utilisateur avec USER_ROLE
+        $user = $this->userFixture($this->em, $this->encoder);
+
+        $crawler = $this->client->request('GET', '/users/'.$user->getId().'/edit');
+
+        $form = $crawler->selectButton('Modifier')->form([
+                   'user_admin[username]' => 'michel',
+                   'user_admin[email]' => 'jonh@doe.com'
+                ]);
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/users');
+        $this->client->followRedirect();
+
+        $responseContent = $this->client->getResponse()->getContent();
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success');
+        $this->assertStringContainsString('michel',$responseContent);
+        $this->assertStringContainsString('jonh@doe.com',$responseContent);
+    }
+
+    /**
+     * @test
+     */
+    public function add_role_admin_for_a_user()
+    {
+        //Création et connection de l'admin
+        $this->createAdminConnected();
+
+        //création de l'utilisateur avec USER_ROLE
+        $user = $this->userFixture($this->em, $this->encoder);
+
+        $crawler =$this->client->request('GET', '/users/'.$user->getId().'/edit');
+
+        $form = $crawler->selectButton('Modifier')->form([
+            'user_admin[adminBool]' => true,
+        ]);
+        $this->client->submit($form);
+
+        $this->assertResponseRedirects('/users');
+        $this->client->followRedirect();
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success');
+
+        $this->client->request('GET', '/users/'.$user->getId().'/edit');
+        $responseContent = $this->client->getResponse()->getContent();
+
+        $this->assertStringContainsString($user->getUsername(),$responseContent);
+        $this->assertStringContainsString($user->getEmail(),$responseContent);
+        $this->assertStringContainsString("checked=\"checked\"", $responseContent);
+    }
 
 
 }

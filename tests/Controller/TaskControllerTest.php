@@ -268,4 +268,24 @@ class TaskControllerTest extends WebTestCase
         $this->assertStringNotContainsString($task1->getTitle(), $responseContent);
         $this->assertStringNotContainsString($task1->getContent(), $responseContent);
     }
+
+    /**
+     * @test
+     */
+    public function task_anonymous_for_admin(){
+        //faire une query avec em pour creer une tache sans auteur
+        $sql = "INSERT INTO task (created_at, title, content) VALUES (NOW(), 'tache ano', 'a anonymous task')";
+        $stmt = $this->em->getConnection()->prepare($sql);
+        $stmt->execute([]);
+
+        //recuperer l'admin et voir si la tache est dans sa liste
+        $admin = $this->adminFixture($this->em, $this->encoder);
+        $this->login($this->client, $admin);
+
+        $this->client->request('GET', '/task');
+        $responseContent = $this->client->getResponse()->getContent();
+
+        $this->assertStringContainsString('tache ano', $responseContent);
+        $this->assertStringContainsString('a anonymous task', $responseContent);
+    }
 }
