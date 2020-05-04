@@ -132,7 +132,11 @@ class TaskController extends AbstractController
         $task->toggle(!$task->isDone());
         $this->getDoctrine()->getManager()->flush();
 
-        $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
+        if($task->isDone()){
+            $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
+        }else{
+            $this->addFlash('success', sprintf('La tâche %s est maintenant dans la liste des tâches à faire.', $task->getTitle()));
+        }
 
         return $this->redirectToRoute('task_list');
     }
