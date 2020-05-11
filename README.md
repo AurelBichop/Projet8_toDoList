@@ -21,6 +21,12 @@ Renseigner la base de données dans le fichier .env
 ### Mise en place des fixtures ###
     php bin/console doctrine:fixtures:load
 
+### Administrateur par défault
+login : **admin**
+ 
+password : **passwordAdmin**
+
+*pour des raisons de sécurités, penser à supprimer ce dernier dés lors que vous vous ête attribué les droits administrateur*
 ### Pour lancer les tests avec PhpUnit: ### 
     php bin/phpunit
 
