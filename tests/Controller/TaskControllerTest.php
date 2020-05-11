@@ -181,9 +181,38 @@ class TaskControllerTest extends WebTestCase
         //Assert
         $this->assertResponseIsSuccessful();
         $this->assertSelectorExists(".alert.alert-success");
+        $this->assertStringContainsString('La tâche '.$task1->getTitle().' a bien été marquée comme faite.',$responseContent);
         $this->assertStringContainsString($task1->getTitle(), $responseContent);
         $this->assertStringNotContainsString($task1->getContent(), $responseContent);
     }
+
+    /**
+     * @test
+     */
+    public function toggle_task_action_should_be_not_done()
+    {
+        //Création et connection de l'utilisateur
+        $user = $this->userConnected();
+        //Arrange
+        $task1 = $this->createTask($user,'Titre tache isDone','contenu tache isDone',true);
+
+        //Act
+        $crawler = $this->client->request('GET', '/task/finish');
+        //clique sur le bouton du formulaire
+        $form = $crawler->selectButton('Marquer non terminée')->form();
+        $this->client->submit($form);
+        $this->client->followRedirect();
+
+        $responseContent = $this->client->getResponse()->getContent();
+
+        //Assert
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists(".alert.alert-success");
+        $this->assertStringContainsString('La tâche '.$task1->getTitle().' est maintenant dans la liste des tâches à faire.',$responseContent);
+        $this->assertStringContainsString($task1->getTitle(), $responseContent);
+        $this->assertStringContainsString($task1->getContent(), $responseContent);
+    }
+
 
     /**
      * @test
@@ -287,5 +316,26 @@ class TaskControllerTest extends WebTestCase
 
         $this->assertStringContainsString('tache ano', $responseContent);
         $this->assertStringContainsString('a anonymous task', $responseContent);
+    }
+
+    /**
+     * @test
+     */
+    public function task_anonymous_finish_for_admin(){
+
+        //faire une query avec em pour creer une tache sans auteur
+        $sql = "INSERT INTO task (created_at, title, content, is_done) VALUES (NOW(), 'tache anonyme fini', 'a anonymous task finish', true)";
+        $stmt = $this->em->getConnection()->prepare($sql);
+        $stmt->execute([]);
+
+        //recuperer l'admin et voir si la tache est dans sa liste
+        $admin = $this->adminFixture($this->em, $this->encoder);
+        $this->login($this->client, $admin);
+
+        $this->client->request('GET', '/task/finish');
+        $responseContent = $this->client->getResponse()->getContent();
+
+        $this->assertStringContainsString('tache anonyme fini', $responseContent);
+        $this->assertStringContainsString('a anonymous task finish', $responseContent);
     }
 }

@@ -32,6 +32,7 @@ class UserTest extends TestCase
     public function a_user_with_admin_role()
     {
         $user = new User();
+        $user->setUsername("UserTest");
 
         $roleAdmin = new Role();
         $roleAdmin->setTitle("ROLE_ADMIN");
@@ -39,9 +40,11 @@ class UserTest extends TestCase
         $user->addRole($roleAdmin);
         $rolesUser = $user->getRoles();
 
+
         $this->assertCount(2,$rolesUser);
         $this->assertSame("ROLE_USER",$user->getRoles()[1]);
         $this->assertSame("ROLE_ADMIN",$user->getRoles()[0]);
+        $this->assertSame("UserTest", $roleAdmin->getUsers()[0]->getUsername());
     }
 
     /**

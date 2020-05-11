@@ -51,7 +51,7 @@ class TaskController extends AbstractController
 
         //Permet la recuperation des taches anonyme pour l'admin
         if($this->getUser()->getAdminBool()){
-            $tasksFinishAnonyme = $taskRepository->findBy(['isDone'=>false, 'author'=>null]);
+            $tasksFinishAnonyme = $taskRepository->findBy(['isDone'=>true, 'author'=>null]);
             $tasksFinish = array_merge($tasksFinish,$tasksFinishAnonyme);
         }
 

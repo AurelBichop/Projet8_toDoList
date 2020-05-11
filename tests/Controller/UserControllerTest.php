@@ -13,7 +13,7 @@ class UserControllerTest extends WebTestCase
     use UserLogin;
 
     /**
-     * Création d'un ROLE_ADMIN
+     * Pour la création d'un ROLE
      * @param string $nameRole
      * @return Role
      */
@@ -29,6 +29,17 @@ class UserControllerTest extends WebTestCase
     }
 
     /**
+     * Recupere le ROLE_ADMIN
+     * @return Role
+     */
+    private function getRoleAdmin(): Role
+    {
+        $repo = $this->em->getRepository(Role::class);
+        return $repo->findOneBy(['title'=>'ROLE_ADMIN']);
+    }
+
+
+    /**
      * Création d'un user ROLE_ADMIN et sa connection
      * @return User
      */
@@ -39,6 +50,8 @@ class UserControllerTest extends WebTestCase
 
         return $admin;
     }
+
+    //=================================================================//
 
     /**
      * @test
@@ -231,8 +244,9 @@ class UserControllerTest extends WebTestCase
 
         //création de l'utilisateur et attribution d'un role admin
         $user = $this->userFixture($this->em, $this->encoder);
-        $roleAdmin = $this->createRole();
+        $roleAdmin = $this->getRoleAdmin();
         $user->addRole($roleAdmin);
+
 
         $this->client->request('GET', '/users/'.$user->getId().'/edit');
         $responseContent = $this->client->getResponse()->getContent();
@@ -240,6 +254,7 @@ class UserControllerTest extends WebTestCase
         $this->assertStringContainsString($user->getUsername(),$responseContent);
         $this->assertStringContainsString($user->getEmail(),$responseContent);
         $this->assertStringContainsString("checked=\"checked\"", $responseContent);
+        $this->assertSame(1, $roleAdmin->getId());
     }
 
     /**
