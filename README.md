@@ -16,10 +16,10 @@ Installer tous les fichiers sur le serveur en utilisant la commande :
 Renseigner la base de données dans le fichier .env
 
 ### Mise en place des migrations ###
-**php bin/console doctrine:migrations:migrate**
+    php bin/console doctrine:migrations:migrate
 
 ### Mise en place des fixtures ###
-**php bin/console doctrine:fixtures:load**
+    php bin/console doctrine:fixtures:load
 
 ### Pour lancer les tests avec PhpUnit: ### 
     php bin/phpunit
