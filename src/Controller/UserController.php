@@ -74,7 +74,7 @@ class UserController extends AbstractController
             $checkAdmin = $form['adminBool']->getData();
 
             $roleAdmin = $roleRepository->findOneBy(['title'=>'ROLE_ADMIN']);
-            //Permet l'enregistrement de l'ajout du ROLE_ADMIN
+            //Permet l'enregistrement de l'ajout ou suppression du ROLE_ADMIN
             if($checkAdmin){
                 $user->addRole($roleAdmin);
             }else{
