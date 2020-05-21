@@ -15,7 +15,7 @@ trait RefreshDataBase
     {
         static $metadata = null;
 
-        if (is_null($metadata)) {
+        if ($metadata === null) {
             $metadata = $this->em->getMetadataFactory()->getAllMetadata();
         }
 
