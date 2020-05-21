@@ -1,4 +1,5 @@
 # Projet8_ToDoList
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8b3cbcf967c14764a14d996d2f0b9215)](https://www.codacy.com/manual/AurelBichop/Projet8_toDoList?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AurelBichop/Projet8_toDoList&amp;utm_campaign=Badge_Grade)
 
 Bichotte Aurélien
 
