@@ -12,12 +12,12 @@ trait CreateUser
     /**
      * Pour la création d'un utilisateur avec le role User en Bdd
      *
-     * @param EntityManagerInterface $em
+     * @param EntityManagerInterface $entityManager
      * @param UserPasswordEncoderInterface $encoder
      * @param array $overrides
      * @return User
      */
-    public function userFixture(EntityManagerInterface $em,UserPasswordEncoderInterface $encoder, array $overrides=[]) :User
+    public function userFixture(EntityManagerInterface $entityManager,UserPasswordEncoderInterface $encoder, array $overrides=[]) :User
     {
         $dataUser = array_merge([
             'username'        => 'aby',
@@ -30,8 +30,8 @@ trait CreateUser
              ->setPassword($encoder->encodePassword($user,'password'));
 
         //enregistrement de l'utilisateur
-        $em->persist($user);
-        $em->flush();
+        $entityManager->persist($user);
+        $entityManager->flush();
 
         return $user;
     }
@@ -39,15 +39,15 @@ trait CreateUser
     /**
      * Pour la création d'un utilisateur en Bdd
      *
-     * @param EntityManagerInterface $em
+     * @param EntityManagerInterface $entityManager
      * @param UserPasswordEncoderInterface $encoder
      * @return User
      */
-    public function adminFixture(EntityManagerInterface $em,UserPasswordEncoderInterface $encoder) :User
+    public function adminFixture(EntityManagerInterface $entityManager,UserPasswordEncoderInterface $encoder) :User
     {
         $roleAdmin = new Role();
         $roleAdmin->setTitle("ROLE_ADMIN");
-        $em->persist($roleAdmin);
+        $entityManager->persist($roleAdmin);
 
         $admin = new User();
         $admin->setUsername('AurelAdmin')
@@ -56,9 +56,9 @@ trait CreateUser
             ->setPassword($encoder->encodePassword($admin,'passwordAdmin'));
 
         //enregistrement de l'admin
-        $em->persist($admin);
+        $entityManager->persist($admin);
 
-        $em->flush();
+        $entityManager->flush();
 
         return $admin;
     }
